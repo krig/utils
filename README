@@ -1,0 +1,10 @@
+Miscellaneous utilities.
+
+gravatar.py
+======================================================
+Stores gravatars (images for emails, www.gravatar.com)
+locally in a cache.
+import gravatar
+print gravatar.get("my@email.com")
+# prints ~/.cache/pygravatar/blah"
+
