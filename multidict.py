@@ -73,12 +73,15 @@ class multidict(object):
             return object.__delattr__(self, name)
 
 def testing():
+    import random
+
     d2 = multidict()
 
     class obj(object):
         def __init__(self, name, size):
             self.name = name
             self.size = size
+            self.rnd = random.randint(0, 100)
         def __str__(self):
             return "<%s, %s>" % (self.name, self.size)
 
@@ -87,6 +90,10 @@ def testing():
 
     d2.add(obj('bill', 3))
     d2.add(obj('jane', 100))
+    d2.add(obj('alice', 190))
+    d2.add(obj('bob', 2))
+    d2.add(obj('charlie', 11))
+    d2.add(obj('foo', 1229))
 
     for n, o in d2.by_name.iteritems():
         print "%s is %s" % (n, o)
@@ -112,6 +119,11 @@ def testing():
             print "%s is %s" % (s, o)
     except AttributeError, e:
         print e
+
+    d2['rand'] = lambda x: x.rnd
+
+    for r, o in d2.by_rand.iteritems():
+        print "%s is %s" % (r, o)
 
 if __name__=="__main__":
     testing()
