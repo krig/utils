@@ -50,6 +50,8 @@ class multidict(object):
         self.__add_index(name, value)
 
     def add(self, item):
+        if not self._indices:
+            raise IndexError("At least one index must be defined before adding items")
         for name, fn in self._indices.iteritems():
             idx = getattr(self, 'by_'+name)
             idx.priv_set(fn(item), item)
