@@ -37,8 +37,7 @@ class multidict(object):
 
         if self._indices:
             # clone an existing index
-            nam2 = self._indices.keys()[0]
-            idx2 = getattr(self, 'by_'+nam2)
+            idx2 = getattr(self, 'by_'+self._indices.iterkeys().next())
             for itm in idx2.values():
                 idx.priv_set(key_fun(itm), itm)
 
@@ -61,7 +60,10 @@ class multidict(object):
             idx.priv_del(fn(item))
 
     def __iter__(self):
-        return self._indices.values().__iter__()
+        if not self._indices:
+            raise IndexError('No index defined on multidict')
+        idx = getattr(self, 'by_'+self._indices.iterkeys().next())
+        return idx.itervalues()
 
     def __delattr__(self, name):
         if name.startswith('by_'):
