@@ -22,7 +22,7 @@
 namespace krig
 {
 	// from http://www.azillionmonkeys.com/qed/hash.html
-	uint32_t default_hash (const char * data, int len, uint32_t hash = 17) {
+	inline uint32_t default_hash (const char * data, int len, uint32_t hash = 17) {
 		uint32_t tmp;
 		int rem;
 
@@ -67,26 +67,18 @@ namespace krig
 		return hash;
 	}
 
-	template <class T>
-	struct hash : public std::unary_function<T, size_t>
-	{
-		inline size_t operator()(T val) const {
-			return static_cast<size_t>(default_hash(&val, sizeof(val)));
-		}
-	};
-
-	size_t hashval(bool v) { return static_cast<size_t>(v); }
-	size_t hashval(char v) { return static_cast<size_t>(v); }
-	size_t hashval(unsigned char v) { return static_cast<size_t>(v); }
-	size_t hashval(short v) { return static_cast<size_t>(v); }
-	size_t hashval(int v) { return static_cast<size_t>(v); }
-	size_t hashval(long v) { return static_cast<size_t>(v); }
-	size_t hashval(unsigned short v) { return static_cast<size_t>(v); }
-	size_t hashval(unsigned int v) { return static_cast<size_t>(v); }
-	size_t hashval(unsigned long v) { return static_cast<size_t>(v); }
-	size_t hashval(float v) { return static_cast<size_t>(v); }
-	size_t hashval(double v) { return static_cast<size_t>(v); }
-	size_t hashval(long double v) { return static_cast<size_t>(v); }
+	inline size_t hashval(bool v) { return static_cast<size_t>(v); }
+	inline size_t hashval(char v) { return static_cast<size_t>(v); }
+	inline size_t hashval(unsigned char v) { return static_cast<size_t>(v); }
+	inline size_t hashval(short v) { return static_cast<size_t>(v); }
+	inline size_t hashval(int v) { return static_cast<size_t>(v); }
+	inline size_t hashval(long v) { return static_cast<size_t>(v); }
+	inline size_t hashval(unsigned short v) { return static_cast<size_t>(v); }
+	inline size_t hashval(unsigned int v) { return static_cast<size_t>(v); }
+	inline size_t hashval(unsigned long v) { return static_cast<size_t>(v); }
+	inline size_t hashval(float v) { return static_cast<size_t>(v); }
+	inline size_t hashval(double v) { return static_cast<size_t>(v); }
+	inline size_t hashval(long double v) { return static_cast<size_t>(v); }
 
 	template <typename T>
 	size_t hashval(T* const& v) {
@@ -95,13 +87,38 @@ namespace krig
 		return x + (x >> 3);
 	}
 
-	size_t hashval(std::string const& v) {
+	template <typename T>
+	size_t hashval(const T* const& v) {
+		std::size_t x = static_cast<std::size_t>(
+			reinterpret_cast<std::ptrdiff_t>(v));
+		return x + (x >> 3);
+	}
+
+	template< class T, unsigned N >
+	size_t hashval(const T (&x)[N]) {
+		return static_cast<size_t>(default_hash((const char*)x, sizeof(T)*N));
+	}
+
+	template< class T, unsigned N >
+	size_t hashval(T (&x)[N]) {
+		return static_cast<size_t>(default_hash((const char*)x, sizeof(T)*N));
+	}
+
+	inline size_t hashval(std::string const& v) {
 		return static_cast<size_t>(default_hash(v.c_str(), v.length()+1));
 	}
 
-	size_t hashval(std::wstring const& v) {
+	inline size_t hashval(std::wstring const& v) {
 		return static_cast<size_t>(default_hash((const char*)v.c_str(), (v.length()+1)*2));
 	}
+
+	template <class T>
+	struct hash : public std::unary_function<T, size_t>
+	{
+		inline size_t operator()(T val) const {
+			return static_cast<size_t>(default_hash(&val, sizeof(val)));
+		}
+	};
 
 // Hash function specializations
 	template <> struct hash<bool>;
