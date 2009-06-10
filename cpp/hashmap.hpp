@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 // http://code.google.com/p/google-sparsehash/
+#include <google/dense_hash_set>
+#include <google/sparse_hash_set>
 #include <google/dense_hash_map>
 #include <google/sparse_hash_map>
 
@@ -88,7 +90,9 @@ namespace krig
 
 	template <typename T>
 	size_t hashval(T* const& v) {
-		return static_cast<size_t>(v);
+		std::size_t x = static_cast<std::size_t>(
+			reinterpret_cast<std::ptrdiff_t>(v));
+		return x + (x >> 3);
 	}
 
 	size_t hashval(std::string const& v) {
@@ -139,7 +143,7 @@ namespace krig
 	KRIG_HASH_SPECIALIZE(double);
 	KRIG_HASH_SPECIALIZE(long double);
 
-	template <> struct hash<T*>
+	template <class T> struct hash<T*>
 		: public std::unary_function<T*, std::size_t>
 	{
 		size_t operator()(T* v) const
@@ -165,6 +169,15 @@ namespace krig
 			return krig::hashval(v);
 		}
 	};
+
+	struct str_eq
+	{
+		bool operator()(const char* s1, const char* s2) const
+		{
+			return (s1 == s2) || (s1 && s2 && strcmp(s1, s2) == 0);
+		}
+	};
+
 
 	using google::dense_hash_map;
 	using google::dense_hash_set;
