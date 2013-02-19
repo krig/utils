@@ -1,0 +1,27 @@
+#!/bin/bash
+
+if [ $# -lt 1 ]; then
+	echo "Expected submodule as argument"
+	exit 1
+fi
+submodule=$1
+
+git submodule status $submodule >/dev/null
+ret=$?
+if [ $ret -ne 0 ]; then
+	exit 1
+fi
+
+git status --porcelain | grep -E "^M" >/dev/null
+ret=$?
+if [ $ret -ne 1 ]; then
+	echo "There are staged changes, aborting"
+	exit 1
+fi
+
+summary=`git submodule summary $submodule`
+git add $submodule
+msg="bump $submodule
+
+$summary"
+git commit -m "$msg"

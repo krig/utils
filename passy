@@ -1,0 +1,68 @@
+#!/usr/bin/env python
+import hashlib, sys, getpass, base64, hmac
+
+def passwordify(s):
+    """Ensures the password contains at least
+    one of each class: digit, lowercase, uppercase, symbol
+    """
+    digits = [str(x) for x in range(0, 10)]
+    lower = [chr(x) for x in range(ord('a'), ord('z')+1)]
+    upper = [chr(x) for x in range(ord('A'), ord('Z')+1)]
+    symbols = "!?+-=*/@#$%&()[];:,.<>"
+    def at(l, x):
+        return l[ord(x)%len(l)]
+    return ''.join([at(upper, s[0]),
+                   at(lower, s[1]),
+                   at(digits, s[2]),
+                   at(symbols, s[3])]) + s[4:]
+
+def mixpass(pwd, pwlen, site):
+    s = hashlib.sha1
+    m = s()
+    m.update('_' + pwd + '_' + site + '_')
+    dig = m.digest()
+    final = base64.b64encode(dig)[:pwlen]
+    return passwordify(final)
+
+def desymbol(pwd):
+    def ds(x): return x if x.isalnum() else base64.b32encode(x)[0]
+    ret = "".join([ds(x) for x in pwd])
+    return ret
+
+def main(clipb=False, pwlen=26, symbols=True):
+    pwlen = int(pwlen)
+    if pwlen < 4:
+        raise Exception('min length is 4')
+    if pwlen > 26:
+        raise Exception('max length is 26')
+    pwd = getpass.getpass()
+    print mixpass(pwd, 7, 'foo')
+    while True:
+        final = mixpass(pwd, pwlen, raw_input('Site: '))
+        if not symbols:
+            final = desymbol(final)
+        if clipb != False:
+            import pyperclip
+            pyperclip.copy(final)
+            print("Copied to clipboard.")
+        else:
+            print(final)
+
+if __name__ == '__main__':
+    try:
+        from optparse import OptionParser
+        parser = OptionParser()
+        parser.add_option("-l", "--len", dest="pwlen",
+                  help="set password length [default: %default]", default=26)
+        parser.add_option("-p", dest="printpw", action="store_true",
+                          help="print generated passwords to screen [default: %default]", default=False)
+        parser.add_option("-S", dest="symbols", action="store_false",
+                          help="disallow symbols in password", default=True)
+        (options, args) = parser.parse_args()
+        use_cb = not options.printpw
+        main(clipb=use_cb, pwlen=options.pwlen, symbols=options.symbols)
+    except KeyboardInterrupt:
+        sys.exit(0)
+    except Exception, e:
+        print e
+        sys.exit(1)

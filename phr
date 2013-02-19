@@ -1,0 +1,8 @@
+#!/usr/bin/env python
+from os.path import expanduser
+from random import seed, sample
+phrdict = expanduser('~/.phrdict')
+seed(None)
+with open(phrdict) as f:
+    words = set(sum([l.split() for l in f.read().splitlines()], []))
+    print ' '.join(sample(words, 4))

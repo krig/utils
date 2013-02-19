@@ -1,5 +1,4 @@
-See each file for license information.
-
+/*
 If there is no license information in the file, assume the following license:
 
             DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
@@ -15,3 +14,21 @@ If there is no license information in the file, assume the following license:
    TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
 
   0. You just DO WHAT THE FUCK YOU WANT TO.
+*/
+#include <time.h>
+
+/*  parses only YYYY-MM-DDTHH:MM:SSZ */
+time_t parseiso8601utc(const char *date) {
+	struct tm tt = {0};
+	double seconds;
+	if (sscanf(date, "%04d-%02d-%02dT%02d:%02d:%lfZ",
+	           &tt.tm_year, &tt.tm_mon, &tt.tm_mday,
+	           &tt.tm_hour, &tt.tm_min, &seconds) != 6)
+		return -1;
+	tt.tm_sec   = (int) seconds;
+	tt.tm_mon  -= 1;
+	tt.tm_year -= 1900;
+	tt.tm_isdst =-1;
+	return mktime(&tt) - timezone;
+}
+
